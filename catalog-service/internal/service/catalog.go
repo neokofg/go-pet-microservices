@@ -126,3 +126,46 @@ func (s *CatalogService) CreateItem(ctx context.Context, req *proto.CreateItemRe
 		UpdatedAt:   itm.UpdatedAt.Format(time.RFC3339),
 	}, nil
 }
+
+func (s *CatalogService) UpdateItem(ctx context.Context, req *proto.UpdateItemRequest) (*proto.Item, error) {
+	builder := s.client.Item.UpdateOneID(req.Id)
+
+	if req.Tags != nil {
+		builder.SetTags(req.Tags)
+	}
+	if req.Title != nil {
+		builder.SetTitle(*req.Title)
+	}
+	if req.Description != nil {
+		builder.SetDescription(*req.Description)
+	}
+	if req.ImageUrl != nil {
+		builder.SetImageURL(*req.ImageUrl)
+	}
+	itm, err := builder.Save(ctx)
+	if err != nil {
+		s.logger.Error("Failed to update itm", zap.Error(err))
+		return nil, status.Error(codes.Internal, "failed to update itm")
+	}
+	return &proto.Item{
+		Id:          itm.ID,
+		Title:       itm.Title,
+		Description: itm.Description,
+		Tags:        itm.Tags,
+		ImageUrl:    itm.ImageURL,
+		Rating:      itm.Rating,
+		ReviewCount: int32(itm.ReviewCount),
+		CreatedAt:   itm.CreatedAt.Format(time.RFC3339),
+		UpdatedAt:   itm.UpdatedAt.Format(time.RFC3339),
+	}, nil
+}
+
+func (s *CatalogService) DeleteItem(ctx context.Context, req *proto.DeleteItemRequest) (*proto.DeleteItemResponse, error) {
+	if err := s.client.Item.DeleteOneID(req.Id).Exec(ctx); err != nil {
+		s.logger.Error("Failed to delete item", zap.Error(err))
+		return nil, status.Error(codes.Internal, "failed to delete item")
+	}
+	return &proto.DeleteItemResponse{
+		Success: true,
+	}, nil
+}

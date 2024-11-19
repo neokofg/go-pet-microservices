@@ -37,27 +37,11 @@ func main() {
 	}
 	defer catalogConn.Close()
 
-	//searchConn, err := initGRPCClient(os.Getenv("SEARCH_SERVICE_ADDR"))
-	//if err != nil {
-	//	logger.Fatal("Failed to connect to search service", zap.Error(err))
-	//}
-	//defer searchConn.Close()
-	//
-	//recommendConn, err := initGRPCClient(os.Getenv("RECOMMEND_SERVICE_ADDR"))
-	//if err != nil {
-	//	logger.Fatal("Failed to connect to recommendation service", zap.Error(err))
-	//}
-	//defer recommendConn.Close()
-
 	catalogClient := proto.NewCatalogServiceClient(catalogConn)
-	//searchClient := proto.NewSearchServiceClient(searchConn)
-	//recommendClient := proto.NewRecommendationServiceClient(recommendConn)
 
 	app := handlers.NewApp(
 		logger,
 		catalogClient,
-		//searchClient,
-		//recommendClient,
 	)
 
 	router.GET("/health", func(c *gin.Context) {

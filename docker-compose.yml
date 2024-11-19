@@ -1,5 +1,3 @@
-version: '3.8'
-
 services:
   api-gateway:
     build:
@@ -47,6 +45,15 @@ services:
     networks:
       - backend
 
+  postgres-exporter:
+    image: quay.io/prometheuscommunity/postgres-exporter
+    environment:
+      - DATA_SOURCE_NAME=postgresql://postgres:postgres@postgres:5432/catalog?sslmode=disable
+    ports:
+      - "9187:9187"
+    networks:
+      - backend
+
   prometheus:
     image: prom/prometheus:latest
     ports:
@@ -60,6 +67,8 @@ services:
     image: grafana/grafana:latest
     ports:
       - "3000:3000"
+    volumes:
+      - grafana-storage:/var/lib/grafana
     depends_on:
       - prometheus
     networks:
@@ -67,6 +76,7 @@ services:
 
 volumes:
   postgres-data:
+  grafana-storage:
 
 networks:
   backend:
